@@ -3,6 +3,8 @@ from typing import Any, Iterable, List, Tuple
 
 from typing_extensions import Protocol
 
+# from .scalar import _var_count
+
 # ## Task 1.1
 # Central Difference calculation
 
@@ -22,7 +24,10 @@ def central_difference(f: Any, *vals: Any, arg: int = 0, epsilon: float = 1e-6) 
     Returns:
         An approximation of $f'_i(x_0, \ldots, x_{n-1})$
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+    # TODO: Implement for Task 1.1.
+    # raise NotImplementedError("Need to implement for Task 1.1")
+    return (f(*[val + epsilon * (i == arg) for i, val in enumerate(vals)]) -\
+            f(*[val - epsilon * (i == arg) for i, val in enumerate(vals)])) / epsilon / 2
 
 
 variable_count = 1
@@ -60,7 +65,25 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
     Returns:
         Non-constant Variables in topological order starting from the right.
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+    # TODO: Implement for Task 1.4.
+    # raise NotImplementedError("Need to implement for Task 1.4")
+    # ways = []
+    # def way(node):
+
+    # variables = []
+
+    # def dfs(node):
+    #     if node.is_constant:
+    #         return
+    #     variables.append(node)
+    #     if not node.is_leaf:
+    #         for node in node.parents:
+    #             dfs(node)
+    
+    # dfs(variable)
+
+    # return variables
+    return
 
 
 def backpropagate(variable: Variable, deriv: Any) -> None:
@@ -74,7 +97,16 @@ def backpropagate(variable: Variable, deriv: Any) -> None:
 
     No return. Should write to its results to the derivative values of each leaf through `accumulate_derivative`.
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+    # TODO: Implement for Task 1.4.
+    # raise NotImplementedError("Need to implement for Task 1.4")
+    if variable.is_constant():
+        return
+    if not variable.is_leaf():
+        inputs = variable.chain_rule(deriv)
+        for child, local_deriv in inputs:
+            backpropagate(child, local_deriv)
+    else:
+        variable.accumulate_derivative(deriv)
 
 
 @dataclass
