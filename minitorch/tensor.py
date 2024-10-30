@@ -138,6 +138,8 @@ class Tensor:
         "Turns a python number into a tensor with the same backend."
         if isinstance(b, (int, float)):
             c = Tensor.make([b], (1,), backend=self.backend)
+        elif isinstance(b, np.int32):
+            c = Tensor.make([b.item()], (1,), backend=self.backend)
         else:
             b._type_(self.backend)
             c = b

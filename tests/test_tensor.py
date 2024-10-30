@@ -66,6 +66,8 @@ def test_permute(data: DataObject, t1: Tensor) -> None:
 
     def permute(a: Tensor) -> Tensor:
         return a.permute(*permutation)
+    
+    # print(f't1 in test_permute = {t1}')
 
     grad_check(permute, t1)
 
@@ -94,6 +96,7 @@ def test_grad_reduce(
 ) -> None:
     "Test the grad of a tensor reduce"
     name, _, tensor_fn = fn
+    # print(t1.shape, type(t1.shape[0]))
     grad_check(tensor_fn, t1)
 
 
