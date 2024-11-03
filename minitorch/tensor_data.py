@@ -3,13 +3,13 @@ from __future__ import annotations
 import random
 from typing import Iterable, Optional, Sequence, Tuple, Union
 
-import numba
+# import numba
 import numpy as np
 import numpy.typing as npt
 from numpy import array, float64
 from typing_extensions import TypeAlias
 
-from .operators import prod
+from minitorch.operators import sum, zipWith, mul, prod
 
 MAX_DIMS = 32
 
@@ -44,7 +44,8 @@ def index_to_position(index: Index, strides: Strides) -> int:
     """
 
     # TODO: Implement for Task 2.1.
-    raise NotImplementedError("Need to implement for Task 2.1")
+    # raise NotImplementedError("Need to implement for Task 2.1")
+    return int(sum(zipWith(mul, index, strides)))
 
 
 def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
@@ -58,10 +59,19 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
         ordinal: ordinal position to convert.
         shape : tensor shape.
         out_index : return index corresponding to position.
-
     """
     # TODO: Implement for Task 2.1.
-    raise NotImplementedError("Need to implement for Task 2.1")
+    # raise NotImplementedError("Need to implement for Task 2.1")
+    for i, size in enumerate(shape[::-1]):
+        out_index[-1 - i] = ordinal % size
+        ordinal //= size
+
+
+def broadcast(s1, s2):
+    if s1 != s2:
+        if s1 != 1 and s2 != 1:
+            raise IndexingError(f"{s1, s2}")
+    return max(s1, s2)
 
 
 def broadcast_index(
@@ -84,7 +94,10 @@ def broadcast_index(
         None
     """
     # TODO: Implement for Task 2.2.
-    raise NotImplementedError("Need to implement for Task 2.2")
+    # raise NotImplementedError("Need to implement for Task 2.2")
+    out_index[:] = big_index[len(big_shape) - len(shape):]
+    for i, dim in enumerate(out_index):
+        out_index[i] = min(dim, shape[i] - 1)
 
 
 def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
@@ -102,7 +115,12 @@ def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
         IndexingError : if cannot broadcast
     """
     # TODO: Implement for Task 2.2.
-    raise NotImplementedError("Need to implement for Task 2.2")
+    # raise NotImplementedError("Need to implement for Task 2.2")
+    s1, s2 = shape1, shape2
+    if len(shape1) < len(shape2):
+        s1, s2 = s2, s1
+    try: return tuple(zipWith(broadcast, list(s1), [1] * (len(s1) - len(s2)) + list(s2)))
+    except IndexingError: raise IndexingError(f'bad broadcast shapes: {shape1}, {shape2}')
 
 
 def strides_from_shape(shape: UserShape) -> UserStrides:
@@ -148,9 +166,9 @@ class TensorData:
         self.shape = shape
         assert len(self._storage) == self.size
 
-    def to_cuda_(self) -> None:  # pragma: no cover
-        if not numba.cuda.is_cuda_array(self._storage):
-            self._storage = numba.cuda.to_device(self._storage)
+    # def to_cuda_(self) -> None:  # pragma: no cover
+    #     if not numba.cuda.is_cuda_array(self._storage):
+    #         self._storage = numba.cuda.to_device(self._storage)
 
     def is_contiguous(self) -> bool:
         """
@@ -223,7 +241,8 @@ class TensorData:
         ), f"Must give a position to each dimension. Shape: {self.shape} Order: {order}"
 
         # TODO: Implement for Task 2.1.
-        raise NotImplementedError("Need to implement for Task 2.1")
+        # raise NotImplementedError("Need to implement for Task 2.1")
+        return TensorData(self.tuple()[0], tuple(self.tuple()[1][list(order)]), tuple(self.tuple()[2][list(order)]))
 
     def to_string(self) -> str:
         s = ""

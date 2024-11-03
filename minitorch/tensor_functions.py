@@ -100,60 +100,80 @@ class Mul(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, b: Tensor) -> Tensor:
         # TODO: Implement for Task 2.3.
-        raise NotImplementedError("Need to implement for Task 2.3")
+        # raise NotImplementedError("Need to implement for Task 2.3")
+        ctx.save_for_backward(a, b)
+        return a.f.mul_zip(a, b)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         # TODO: Implement for Task 2.4.
-        raise NotImplementedError("Need to implement for Task 2.4")
+        # raise NotImplementedError("Need to implement for Task 2.4")
+        a, b = ctx.saved_values
+        return grad_output * b, grad_output * a
 
 
 class Sigmoid(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor) -> Tensor:
         # TODO: Implement for Task 2.3.
-        raise NotImplementedError("Need to implement for Task 2.3")
+        # raise NotImplementedError("Need to implement for Task 2.3")
+        ctx.save_for_backward(t1)
+        return t1.f.sigmoid_map(t1)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tensor:
         # TODO: Implement for Task 2.4.
-        raise NotImplementedError("Need to implement for Task 2.4")
+        # raise NotImplementedError("Need to implement for Task 2.4")
+        (t1,) = ctx.saved_values
+        return t1.f.sigmoid_back_zip(t1, grad_output)
 
 
 class ReLU(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor) -> Tensor:
         # TODO: Implement for Task 2.3.
-        raise NotImplementedError("Need to implement for Task 2.3")
+        # raise NotImplementedError("Need to implement for Task 2.3")
+        ctx.save_for_backward(t1)
+        return t1.f.relu_map(t1)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tensor:
         # TODO: Implement for Task 2.4.
-        raise NotImplementedError("Need to implement for Task 2.4")
+        # raise NotImplementedError("Need to implement for Task 2.4")
+        (t1,) = ctx.saved_values
+        return t1.f.relu_back_zip(t1, grad_output)
 
 
 class Log(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor) -> Tensor:
         # TODO: Implement for Task 2.3.
-        raise NotImplementedError("Need to implement for Task 2.3")
+        # raise NotImplementedError("Need to implement for Task 2.3")
+        ctx.save_for_backward(t1)
+        return t1.f.log_map(t1)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tensor:
         # TODO: Implement for Task 2.4.
-        raise NotImplementedError("Need to implement for Task 2.4")
+        # raise NotImplementedError("Need to implement for Task 2.4")
+        (t1,) = ctx.saved_values
+        return t1.f.log_back_zip(t1, grad_output)
 
 
 class Exp(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor) -> Tensor:
         # TODO: Implement for Task 2.3.
-        raise NotImplementedError("Need to implement for Task 2.3")
+        # raise NotImplementedError("Need to implement for Task 2.3")
+        ctx.save_for_backward(t1)
+        return t1.f.exp_map(t1)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tensor:
         # TODO: Implement for Task 2.4.
-        raise NotImplementedError("Need to implement for Task 2.4")
+        # raise NotImplementedError("Need to implement for Task 2.4")
+        (t1,) = ctx.saved_values
+        return grad_output * t1.f.exp_map(t1)
 
 
 class Sum(Function):
@@ -181,43 +201,96 @@ class LT(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, b: Tensor) -> Tensor:
         # TODO: Implement for Task 2.3.
-        raise NotImplementedError("Need to implement for Task 2.3")
+        # raise NotImplementedError("Need to implement for Task 2.3")
+        return a.f.lt_zip(a, b)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         # TODO: Implement for Task 2.4.
-        raise NotImplementedError("Need to implement for Task 2.4")
+        # raise NotImplementedError("Need to implement for Task 2.4")
+        return 0, 0
 
 
 class EQ(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, b: Tensor) -> Tensor:
         # TODO: Implement for Task 2.3.
-        raise NotImplementedError("Need to implement for Task 2.3")
+        # raise NotImplementedError("Need to implement for Task 2.3")
+        return a.f.eq_zip(a, b)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         # TODO: Implement for Task 2.4.
-        raise NotImplementedError("Need to implement for Task 2.4")
+        # raise NotImplementedError("Need to implement for Task 2.4")
+        return 0, 0
 
 
 class IsClose(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, b: Tensor) -> Tensor:
         # TODO: Implement for Task 2.3.
-        raise NotImplementedError("Need to implement for Task 2.3")
+        # raise NotImplementedError("Need to implement for Task 2.3")
+        return a.f.is_close_zip(a, b)
 
 
 class Permute(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, order: Tensor) -> Tensor:
         # TODO: Implement for Task 2.3.
-        raise NotImplementedError("Need to implement for Task 2.3")
+        # raise NotImplementedError("Need to implement for Task 2.3")
+        order = order.to_numpy().astype(int)
+        new_shape = a._tensor._shape[list(order)]
+        new_strides = a._tensor._strides[list(order)]
+
+        ctx.save_for_backward(order, new_shape, new_strides)
+
+        # a._tensor._strides = np.array(new_strides)
+        # a._tensor._shape = np.array(new_shape)
+        # a._tensor.strides = new_strides
+        # a._tensor.shape = new_shape
+
+        # return a
+
+        return minitorch.Tensor.make(
+            a._tensor._storage, tuple(new_shape), tuple(new_strides), backend=a.backend
+        )
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, float]:
         # TODO: Implement for Task 2.4.
-        raise NotImplementedError("Need to implement for Task 2.4")
+        # raise NotImplementedError("Need to implement for Task 2.4")
+        (order, shape, strides) = ctx.saved_values
+
+        inv_permute = [0] * len(order)
+        for i, pos in enumerate(order):
+            inv_permute[pos] = i
+        
+        new_shape = tuple(shape[list(inv_permute)])
+        new_strides = tuple(strides[list(inv_permute)])
+
+        # grad_output._tensor._strides = np.array(new_strides)
+        # grad_output._tensor._shape = np.array(new_shape)
+        # grad_output._tensor.strides = new_strides
+        # grad_output._tensor.shape = new_shape
+
+        # print(f'grad_output = {grad_output}, a = {a}')
+
+        # print(f'grad_output in Permute backward = {grad_output}')
+        # print(f'grad_output * a in Permute backward = {grad_output * a}')
+        
+        # return grad_output * a, 0
+
+        return (
+            minitorch.Tensor.make(
+                grad_output._tensor._storage, new_shape, new_strides, backend=grad_output.backend
+            ),
+            0.0,
+        )
+
+        # def inverse_permutation(perm):
+        #     inv = torch.empty_like(perm)
+        #     inv[perm] = torch.arange(perm.size(0), device=perm.device)
+        #     return inv
 
 
 class View(Function):
@@ -383,11 +456,14 @@ def grad_central_difference(
 
 
 def grad_check(f: Any, *vals: Tensor) -> None:
+    # print(f'vals in grad_check = {vals}')
     for x in vals:
         x.requires_grad_(True)
         x.zero_grad_()
     random.seed(10)
     out = f(*vals)
+    # print(f'out in grad_check = {out}')
+    # print(f'out sum in grad_check = {out.sum()}')
     out.sum().backward()
     err_msg = """
 
@@ -404,6 +480,7 @@ but was expecting derivative %f from central difference.
         ind = x._tensor.sample()
         check = grad_central_difference(f, *vals, arg=i, ind=ind)
         assert x.grad is not None
+        # print(x.grad[ind], check)
         np.testing.assert_allclose(
             x.grad[ind],
             check,
